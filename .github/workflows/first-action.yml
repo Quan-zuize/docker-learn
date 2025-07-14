@@ -17,7 +17,8 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  test:
+    name: Run tests
     # The type of runner that the job will run on
     runs-on: windows-latest
 
@@ -28,13 +29,32 @@ jobs:
         run: echo Hello, world!
 
       - name: Get code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install NodeJS
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Install dependencies
         run: npm ci
       - name: Run tests
         run: npm test
+
+  build:
+    name: Build Project
+    runs-on: windows-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci
+      - name: Run build
+        run: npm run build
