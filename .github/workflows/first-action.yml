@@ -27,6 +27,7 @@ jobs:
         run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
 
       - name: Cache npm
+        id: cache-npm
         uses: actions/cache@v4
         with:
           path: ${{ steps.npm-cache-dir.outputs.dir }}
@@ -35,11 +36,19 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install dependencies
+        if : steps.cache-npm.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Run tests
-        run: npm test
+        id: test
+        run: npm test 
 
+      - name: Upload build artifacts
+        if: success() && steps.test.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: build/
   build:
     name: Build Project
     runs-on: ubuntu-latest
@@ -67,13 +76,19 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install dependencies
+        if : steps.cache-npm.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Run build
         run: npm run build
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: build/
+  report:
+    needs: [build]
+    if: failure()
+    name: Report Failure
+    runs-on: ubuntu-latest
+    steps:
+      -name: Output failure message
+        run: |
+          echo "Some went wrong"
+          echo "${GITHUB_WORKFLOW} failed on ${{ github.event_name }} for ${{ github.repository }} at commit ${{ github.sha }}"
