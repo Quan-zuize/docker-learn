@@ -28,7 +28,6 @@ jobs:
 
       - name: Cache npm
         id: cache-npm
-        id: cache-npm
         uses: actions/cache@v4
         with:
           path: ${{ steps.npm-cache-dir.outputs.dir }}
@@ -37,15 +36,12 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install dependencies
-        if : steps.cache-npm.outputs.cache-hit != 'true'
-        if : steps.cache-npm.outputs.cache-hit != 'true'
+        if: steps.cache-npm.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Run tests
         id: test
         run: npm test 
-        id: test
-        run: npm test 
 
       - name: Upload build artifacts
         if: success() && steps.test.outcome == 'success'
@@ -53,12 +49,7 @@ jobs:
         with:
           name: build-artifacts
           path: build/
-      - name: Upload build artifacts
-        if: success() && steps.test.outcome == 'success'
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: build/
+          
   build:
     name: Build Project
     runs-on: ubuntu-latest
@@ -86,8 +77,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install dependencies
-        if : steps.cache-npm.outputs.cache-hit != 'true'
-        if : steps.cache-npm.outputs.cache-hit != 'true'
+        if: steps.cache-npm.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Run build
@@ -99,7 +89,7 @@ jobs:
     name: Report Failure
     runs-on: ubuntu-latest
     steps:
-      -name: Output failure message
-      run: |
-        echo "Some went wrong"
-        echo "${GITHUB_WORKFLOW} failed on ${{ github.event_name }} for ${{ github.repository }} at commit ${{ github.sha }}"
+      - name: Output failure message
+        run: |
+          echo "Something went wrong"
+          echo "${GITHUB_WORKFLOW} failed on ${{ github.event_name }} for ${{ github.repository }} at commit ${{ github.sha }}"
